@@ -1,13 +1,3 @@
-/* HONOR PLEDGE: I pledge on my honor that 
-   I have not given or received any unauthorized
-   assistance on this assignment.
-   Name: Arman Bolouri
-   TerpConnect ID: abolouri
-   UID: 117292084
-   Discussion Section Number: 0206
-*/
-
-
 #include <stdio.h>
 #include "machine.h"
 
@@ -84,13 +74,7 @@ void print_instruction(Hardware_word instruction) {
       if (!((i == 1 && (opcode == 12 || opcode == 13 || opcode == 14)) ||
 	    (i == 2 && (opcode == 6 || opcode == 9 || opcode == 11 ||
 			opcode == 12 || opcode == 13 || opcode == 14))))
-	/* Formats to print the register number with an R in front of it.
-	   Calculates the register number by bitshifting the instruction
-	   to the right by 23, 18, and 13 respectively to have the 5
-	   rightmost bits signify Reg1, Reg2, and Reg3 respectively,
-	   &'ing this with 11111 */
 	printf("R%d\t", (instruction >> (23 - (5 * i))) & 31);
-	/* 31 signifies 11111 */
     }
   }
 
@@ -110,27 +94,10 @@ unsigned int encode_instruction(unsigned short opcode, unsigned short reg1,
 				unsigned int addr_or_constant,
 				Hardware_word *const hw_word) {
   unsigned int instruction;
-  /* Dependent upon which opcode is passed for this instruction,
-     different registers/address/constant/parameters need to be validated
-     and different constraints are present on each of these individual
-     opcodes, so we need to check each group of cases as we do with the
-     valid_instruction() method. If this if statement is true, we know that
-     the given operands for the certain opcode were invalid(or the opcode was
-     invalid or hw_word is NULL), so we return 0, don't
-     modify anything, and thus, end execution.*/
   if (hw_word == NULL ||
       valid_instruction(opcode, reg1, reg2, reg3, addr_or_constant) == 0)
     return 0;
-  /* We know that there HAS to be an opcode in the first 4 bits of the
-     32-bit Mathlon instruction, so we set the var "instruction" as our
-     prototype for the final insturction we will ultimately return */
   instruction = opcode << 28;
-  /* After ensuring that the operands for the certain opcode are valid, we
-     utilize bitshifts and bitmasking to put each operand/parameter in their
-     respective bit positions of the ultimate 32-bit mathlon instruction
-     stored in "instruction". We know that this singular encoded instruction
-     satsifies the constraints of the certain opcode, so we set what
-     hw_word points to to this word and return 1. */
   *hw_word = (((instruction | (reg1 << 23)) | (reg2 << 18))
 	      | (reg3 << 13)) | addr_or_constant;
   return 1;
@@ -146,23 +113,14 @@ unsigned int disassemble(const Hardware_word memory[],
 			 unsigned int memory_size, unsigned int num_instrs) {
   int i;
 
-  /* Checking for invalid parameters */
   if (memory == NULL || memory_size > 512 || memory_size == 0 ||
       num_instrs == 0 || num_instrs > memory_size)
     return 0;
   
   for (i = 0; i < memory_size; i++) {
-    /* If i >= num_instrs, we know that we've passed all the instructions in
-       memory[] so we print both the elements of memory[] storing data and their
-       respective mathlon memory address, both of these in hex */
     if (i >= num_instrs)
       printf("%03x: %08x\n", i * 4, memory[i]);
     else {
-      /*If not, we seperate each part/operand from the binary instruction
-      through bitshifting and bitmasking as done before, check to see if
-      constraints are valid for certain opcodes by utilizing the
-      valid_instruction() function, & ultimately print these components if they
-      are valid */
       unsigned short opcode = memory[i] >> 28;
       unsigned short reg1 = (memory[i] >> 23) & 31; /* 31 signifies 11111 */
       unsigned short reg2 = (memory[i] >> 18) & 31;
@@ -188,11 +146,6 @@ unsigned int disassemble(const Hardware_word memory[],
    dependent on their opcode value to see if they
    carry out the same instruction */
 unsigned int compare_instructions(Hardware_word instr1, Hardware_word instr2) {
-  /* Declare variables and bitshift+bitmask to find individual
-     components/parts of each instruction.
-     Then, dependent on the opcode, we compare each relevant component
-     between the two instructions to see whether they carry out the same
-     task and are indeed equivalent */
   unsigned int opcode = instr1 >> 28;
   unsigned int opcode2 = instr2 >> 28;
 
@@ -206,14 +159,9 @@ unsigned int compare_instructions(Hardware_word instr1, Hardware_word instr2) {
   unsigned int second_reg3 = (instr2 >> 13) & 31;
   unsigned int second_addr_or_constant = instr2 & 8191;
 
-  /* Obviously, if the opcodes themselves are different, the instructions
-     carry out a completely different task, so we end execution
-     here and return 0 */
   if (opcode != opcode2)
     return 0;
   
-  /* Rest of this is fairly obvious casework checking of relevant operands,
-     so no explanation needed */
   if (opcode == 1 || opcode == 2 || opcode == 3 || opcode == 4 ||
       opcode == 5 || opcode == 7 || opcode == 8) {
     if (first_reg1 == second_reg1 && first_reg2 == second_reg2 &&
@@ -239,19 +187,9 @@ unsigned int compare_instructions(Hardware_word instr1, Hardware_word instr2) {
 }
 
 
-/* Within this helper method, we determine whether the passed instruction
-   (in terms of individual operands) is valid or not. Dependent upon which
-   opcode is passed for this instruction (assuming the opcode is valid,
-   if not the function returns 0), different
-   registers/address/constant/parameters need to be validated since different
-   constraints are present on each of these individual opcodes, so we need to
-   check each group of cases as we do within this method and group of if
-   statements. Returns 1 if the instruction is valid, and 0 otherwise. */
 static int valid_instruction(unsigned short opcode, unsigned short reg1,
 				unsigned short reg2, unsigned short reg3,
 				unsigned int addr_or_constant) {
-  /* Rest of this is fairly trivial/obvious casework checking of
-     relevant operands, so no explanation needed */
   if (!(opcode >= 0 && opcode < 15))
     return 0;
   
