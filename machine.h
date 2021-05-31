@@ -1,6 +1,3 @@
-/* (c) Larry Herman, 2020.  You are allowed to use this code yourself, but
-   not to provide it to anyone else. */
-
 #define NUM_BYTES 2048
 #define BYTES_PER_WORD 4
 #define NUM_WORDS (NUM_BYTES / BYTES_PER_WORD)
